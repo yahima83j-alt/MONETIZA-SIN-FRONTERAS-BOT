@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yahi Bot — Monetiza Sin Fronteras</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --coco: #FFFFFF;
+    --rosa: #F7C6D4;
+    --rosa-titulo: #7B1E4A;
+    --rosa-btn: #E8A0B8;
+    --rosa-light: #FDF0F4;
+    --gold: #C9A96E;
+    --text: #1A1A1A;
+    --text-light: #888;
+    --shadow: rgba(123,30,74,0.08);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #F5E8EE;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-image:
+      radial-gradient(ellipse at 10% 10%, rgba(247,198,212,0.40) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 90%, rgba(201,169,110,0.12) 0%, transparent 50%);
+  }
+  .container {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(123,30,74,0.13), 0 4px 20px rgba(247,198,212,0.25);
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #7B1E4A 0%, #9B2E60 60%, #B54070 100%);
+    padding: 24px 28px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content:''; position:absolute; top:-40px; right:-40px;
+    width:160px; height:160px; border-radius:50%;
+    background:rgba(255,255,255,0.06);
+  }
+  .header::after {
+    content:''; position:absolute; bottom:-30px; left:35%;
+    width:100px; height:100px; border-radius:50%;
+    background:rgba(247,198,212,0.10);
+  }
+  .avatar {
+    width:52px; height:52px; border-radius:50%;
+    background: linear-gradient(135deg, var(--gold), #E0C88A);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Playfair Display',serif;
+    font-size:22px; color:#fff; font-weight:600;
+    flex-shrink:0;
+    box-shadow:0 4px 16px rgba(0,0,0,0.20);
+    position:relative; z-index:1;
+  }
+  .header-info { position:relative; z-index:1; }
+  .header-info h1 {
+    font-family:'Playfair Display',serif;
+    font-size:20px; color:#fff; font-weight:600;
+  }
+  .header-info p {
+    font-size:11.5px; color:rgba(255,255,255,0.75);
+    font-weight:300; margin-top:2px; letter-spacing:0.3px;
+  }
+  .status {
+    margin-left:auto; display:flex; align-items:center; gap:6px;
+    position:relative; z-index:1;
+  }
+  .status-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:#A8EDBC;
+    box-shadow:0 0 8px rgba(168,237,188,0.7);
+    animation:pulse 2s infinite;
+  }
+  .status span { font-size:11px; color:rgba(255,255,255,0.80); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* QUICK REPLIES */
+  .quick-replies {
+    background: var(--rosa-light);
+    padding: 10px 18px 8px;
+    display: flex; flex-wrap: wrap; gap: 7px;
+    border-bottom: 1px solid rgba(247,198,212,0.35);
+  }
+  .quick-btn {
+    background:#fff;
+    border:1.5px solid var(--rosa);
+    color: var(--rosa-titulo);
+    border-radius:20px;
+    padding:5px 13px;
+    font-family:'Poppins',sans-serif; font-size:11.5px; font-weight:500;
+    cursor:pointer; transition:all 0.2s; white-space:nowrap;
+  }
+  .quick-btn:hover {
+    background:var(--rosa-light);
+    border-color:var(--rosa-titulo);
+    transform:translateY(-1px);
+  }
+
+  /* CHAT */
+  .chat-area {
+    background: #FAFAFA;
+    height: 440px; overflow-y:auto;
+    padding: 22px 22px 10px;
+    display:flex; flex-direction:column; gap:16px;
+    scroll-behavior:smooth;
+  }
+  .chat-area::-webkit-scrollbar { width:4px; }
+  .chat-area::-webkit-scrollbar-thumb { background:var(--rosa); border-radius:4px; }
+
+  .message { display:flex; gap:9px; align-items:flex-end; animation:fadeUp 0.3s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .message.user { flex-direction:row-reverse; }
+
+  .msg-avatar {
+    width:32px; height:32px; border-radius:50%;
+    flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:600;
+  }
+  .bot-av {
+    background:linear-gradient(135deg, var(--gold), #E0C88A);
+    color:#fff; font-family:'Playfair Display',serif; font-size:15px;
+  }
+  .user-av { background:var(--rosa-light); color:var(--rosa-titulo); font-size:16px; }
+
+  .msg-wrap { display:flex; flex-direction:column; max-width:80%; }
+  .message.user .msg-wrap { align-items:flex-end; }
+
+  .bubble {
+    padding:12px 16px; border-radius:18px;
+    font-size:13.5px; line-height:1.70; color:var(--text);
+  }
+  .bot .bubble {
+    background:#fff; border-bottom-left-radius:4px;
+    box-shadow:0 2px 12px var(--shadow);
+  }
+  .user .bubble {
+    background:linear-gradient(135deg, #9B2E60, var(--rosa-titulo));
+    color:#fff; border-bottom-right-radius:4px;
+    box-shadow:0 2px 12px rgba(123,30,74,0.22);
+  }
+  .timestamp {
+    font-size:10px; color:var(--text-light);
+    margin-top:3px; padding:0 4px; opacity:0.55;
+  }
+  .message.user .timestamp { text-align:right; }
+
+  /* TYPING */
+  .typing { display:flex; gap:9px; align-items:flex-end; }
+  .typing-bubble {
+    background:#fff; border-radius:18px; border-bottom-left-radius:4px;
+    padding:14px 18px; box-shadow:0 2px 12px var(--shadow);
+    display:flex; gap:5px; align-items:center;
+  }
+  .typing-dot {
+    width:7px; height:7px; border-radius:50%;
+    background:var(--rosa-btn); animation:bounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2){animation-delay:0.2s}
+  .typing-dot:nth-child(3){animation-delay:0.4s}
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+  /* INPUT */
+  .input-area {
+    background:#fff; border-top:1px solid rgba(247,198,212,0.30);
+    padding:14px 18px; display:flex; gap:10px; align-items:flex-end;
+  }
+  .input-wrap {
+    flex:1; background:var(--rosa-light); border-radius:22px;
+    padding:10px 16px; display:flex; align-items:center;
+    border:1.5px solid transparent; transition:border-color 0.2s;
+  }
+  .input-wrap:focus-within { border-color:var(--rosa); }
+  textarea {
+    flex:1; border:none; background:transparent;
+    font-family:'Poppins',sans-serif; font-size:13.5px; color:var(--text);
+    resize:none; outline:none; max-height:100px; line-height:1.5;
+  }
+  textarea::placeholder { color:#BBA0A8; }
+  .send-btn {
+    width:44px; height:44px; border-radius:50%; border:none;
+    background:linear-gradient(135deg, #9B2E60, var(--rosa-titulo));
+    color:#fff; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform 0.2s, box-shadow 0.2s;
+    flex-shrink:0; box-shadow:0 4px 14px rgba(123,30,74,0.30);
+  }
+  .send-btn:hover { transform:scale(1.08); box-shadow:0 6px 20px rgba(123,30,74,0.40); }
+  .send-btn:active { transform:scale(0.95); }
+  .send-btn:disabled { opacity:0.40; cursor:not-allowed; transform:none; }
+
+  /* FOOTER */
+  .footer {
+    background:#fff; padding:9px 20px; text-align:center;
+    font-size:10.5px; color:var(--text-light); opacity:0.6;
+    border-top:1px solid rgba(247,198,212,0.20); letter-spacing:0.3px;
+  }
+  .footer span { color:var(--gold); font-weight:500; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="avatar">Y</div>
+    <div class="header-info">
+      <h1>Yahi Bot ✨</h1>
+      <p>Asistente oficial · Monetiza Sin Fronteras</p>
+    </div>
+    <div class="status">
+      <div class="status-dot"></div>
+      <span>En línea</span>
+    </div>
+  </div>
+
+  <div class="quick-replies">
+    <button class="quick-btn" onclick="sendQuick('¿Por dónde empiezo desde cero?')">🚀 ¿Por dónde empiezo?</button>
+    <button class="quick-btn" onclick="sendQuick('¿Cómo configuro el VPN?')">🔒 VPN</button>
+    <button class="quick-btn" onclick="sendQuick('¿Cómo compro e instalo Tello?')">📱 Tello</button>
+    <button class="quick-btn" onclick="sendQuick('¿Cómo funciona Amazon Influencer?')">📦 Amazon</button>
+    <button class="quick-btn" onclick="sendQuick('¿Qué es UGC y cómo empiezo?')">🎬 UGC</button>
+    <button class="quick-btn" onclick="sendQuick('¿Cómo monetizo en TikTok Shop?')">🛍️ TikTok Shop</button>
+    <button class="quick-btn" onclick="sendQuick('¿Qué métodos de pago necesito?')">💳 Pagos</button>
+  </div>
+
+  <div class="chat-area" id="chatArea">
+    <div class="message bot">
+      <div class="msg-avatar bot-av">Y</div>
+      <div class="msg-wrap">
+        <div class="bubble">
+          ¡Hola, niña y niño! 👋 Me alegra que estés aquí — bienvenido/a a <strong>Monetiza Sin Fronteras</strong>.<br><br>
+          Soy tu asistente de la academia — aquí para explicarte todo lo que necesitas, sin enredos, sin palabras raras y sin saltarme nada.<br><br>
+          Dime qué tienes en mente o en qué punto estás, y te explico exactamente qué hacer. 🌸
+        </div>
+        <div class="timestamp">Ahora</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <div class="input-wrap">
+      <textarea id="userInput" placeholder="Escribe tu pregunta aquí..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    </div>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </div>
+
+  <div class="footer">Powered by <span>Yahi & Co. Digital LLC</span> · Monetiza Sin Fronteras</div>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `Eres el bot oficial de la academia "Monetiza Sin Fronteras con Yahi".
+
+QUIÉN ERES:
+No eres un robot frío. Eres la voz de Yahi dentro de la academia. Hablas exactamente como ella: directa, natural, cercana, como explicándole a una amiga que no sabe nada todavía. Sin palabras raras. Sin frases motivacionales vacías. Sin "películas". Sin adornos.
+
+TU FORMA DE HABLAR:
+- Usas expresiones como: "mira esto…", "te lo voy a explicar fácil…", "no te compliques…", "esto es así…", "mi amor…" — y cuando el contexto lo permite también "niña" o "hermano" según quien pregunte, pero sin asumir género si no sabes.
+- No hablas como profesor ni como empresa.
+- Hablas como alguien que ya pasó por eso y lo explica claro.
+- Dices la verdad aunque no sea lo que la persona quiere escuchar.
+- Explicas TODO paso a paso, sin saltarte nada.
+
+REGLAS INQUEBRANTABLES:
+❌ No uses lenguaje técnico complicado
+❌ No respondas corto ni superficial
+❌ No des respuestas tipo Google
+❌ No hables como empresa ni como robot
+❌ No prometas dinero rápido ni resultados mágicos
+❌ No apoyes cuentas falsas, documentos falsos ni datos de otras personas
+✔ Explica todo bien detallado
+✔ Como si la persona no supiera nada
+✔ Siempre paso a paso
+✔ Con ejemplos simples y reales
+✔ Sé honesta aunque duela
+
+ESTRUCTURA DE CADA RESPUESTA (cuando expliques algo):
+1. Qué es (explicación clara y simple)
+2. Para qué sirve
+3. Cómo se hace (paso a paso numerado)
+4. Errores comunes que comete la gente
+5. Advertencia real — lo que nadie dice
+6. Cierre: "Ahora dime en qué parte estás tú, para decirte exactamente qué hacer."
+
+EJEMPLO DE TU TONO:
+"Niña, te lo voy a explicar fácil… Tello es un número de Estados Unidos, pero no es magia. No es que tú lo compras y ya todo te funciona. Te sirve, sí… pero tiene que ir junto con todo lo demás: VPN, dispositivo bien configurado, método de pago. Si solo tienes el número pero nada más está listo, igual puedes tener problemas."
+
+---
+
+CONOCIMIENTO DE LA ACADEMIA:
+
+MÓDULO 1 — MENTALIDAD DIGITAL REAL:
+Qué es: Antes de abrir cuentas o querer cobrar, hay que entender la realidad.
+Para qué: Para no quemarte ni perder dinero haciendo las cosas mal.
+La realidad: Monetizar online no es magia ni suerte. Requiere estructura, paciencia, inversión y cumplimiento de reglas.
+Lo que necesitas construir: dispositivo + conexión + número + método de cobro + datos fiscales coherentes.
+Errores comunes: Querer cobrar antes de tener estructura. Comprar cuentas. Usar datos de otra persona. Hacer todo a lo loco.
+Advertencia real: Si lo haces sin orden, te llegan los bloqueos. Y recuperar una cuenta bloqueada después es mucho más difícil.
+
+MÓDULO 2 — ENTORNO DIGITAL COHERENTE:
+Qué es: Es cómo te ven las plataformas. Tu teléfono, tu conexión, tu región, tu número y tus cuentas tienen que contar la misma historia.
+Para qué: Para trabajar de forma estable, sin inconsistencias que levanten banderas.
+Pasos:
+1. Usar un solo dispositivo principal al inicio. No hoy desde el iPhone, mañana desde la laptop de tu vecina.
+2. iPhone: Configuración > General > Idioma y Región > poner Estados Unidos.
+3. Computadora: revisar región, zona horaria e idioma del navegador.
+4. No cambiar de IP de país todos los días. Hoy Miami, mañana España, luego México = problema seguro.
+5. Crear un perfil nuevo en Chrome solo para trabajo. No mezcles cuentas personales con cuentas de monetización.
+6. Tener correo profesional: Gmail serio o con dominio propio. Nada de correos raros.
+Errores comunes: Entrar desde mil dispositivos distintos. Mezclar cuentas personales y de trabajo. Cambiar de país constantemente.
+Advertencia real: Las plataformas son más inteligentes de lo que crees. Ven todo.
+
+MÓDULO 3 — VPN DESDE CERO:
+Qué es: Una VPN cambia la ruta de tu conexión a internet y puede mostrar que estás en otro lugar.
+Para qué: Para trabajar plataformas americanas con coherencia digital. No para engañar, sino para mantener consistencia.
+Pasos:
+1. Nunca uses VPN gratis para cuentas importantes. Las IPs gratis están quemadas, las usan millones de personas.
+2. Compra una VPN paga y estable.
+3. Elige una ciudad y quédate ahí. Si empiezas con Miami, sigue con Miami. No cambies cada día.
+4. Activa la VPN ANTES de abrir cualquier plataforma. Primero VPN, después navegador.
+5. Verifica tu IP antes de entrar: busca en Google "What is my IP" y confirma que aparece USA.
+6. Separa: cuentas personales van sin VPN o con otra, cuentas de monetización siempre con la misma VPN y ciudad.
+Errores comunes: Usar VPN gratis. Cambiar de país cada día. Olvidar activarla antes de entrar. Mezclar cuentas.
+Advertencia real: La VPN no arregla documentos, no arregla impuestos y no garantiza aprobación. Es UNA parte del sistema, no la solución completa.
+
+MÓDULO 4 — TELLO DESDE CERO:
+Qué es: Tello es una compañía móvil de Estados Unidos que te da un número americano real mediante eSIM o SIM física, con planes económicos.
+Para qué: Para tener número de USA y recibir SMS, llamadas y verificaciones en plataformas americanas.
+Requisitos previos:
+- Teléfono compatible con eSIM y desbloqueado
+- Internet estable
+- Método de pago válido (tarjeta, PayPal, Apple Pay, Venmo)
+- Dirección E911 para activar WiFi Calling
+Pasos:
+1. Entra a tello.com
+2. Revisa compatibilidad: sección "Bring Your Own Phone" o pon tu IMEI (Configuración > General > Información)
+3. Elige eSIM si necesitas activación rápida
+4. Elige el plan más básico si solo necesitas recibir códigos. No gastes en el más caro sin necesidad.
+5. Crea tu cuenta con correo real y contraseña segura
+6. Paga. Si falla: revisa dirección de facturación, banco, si la VPN está interfiriendo, o el método de pago
+7. Te mandan un QR. Instala la eSIM: Configuración > Datos Celulares > Agregar eSIM > Usar código QR
+8. Nombra la línea "Tello USA" o algo que la identifiques
+9. Espera que active. Si no aparece señal: verifica que el teléfono esté desbloqueado, reinicia
+10. Activa WiFi Calling: Configuración > Celular > Línea Tello > Llamadas por WiFi > Activar
+11. Registra tu dirección E911 cuando lo pida
+12. Prueba: mándate un SMS, haz una llamada de prueba
+13. Paga mensual. Si dejas de pagar, pierdes el número
+Errores comunes: Comprar sin verificar que el teléfono sirve. No activar WiFi Calling. No tener internet estable al instalar. No pagar mensual.
+Advertencia real: Tello no es varita mágica. No garantiza aprobación en todas las plataformas. Lo que garantiza el éxito es tener TODO coherente: número + VPN + dispositivo + método de pago + datos reales.
+
+MÓDULO 5 — WIFI CALLING:
+Qué es: Función que permite hacer y recibir llamadas y mensajes usando WiFi cuando no tienes señal móvil.
+Para qué: Para que tu número Tello funcione aunque no tengas cobertura física de la red.
+Condiciones: teléfono compatible + WiFi Calling activado en la línea + dirección E911 registrada + internet que lo permita.
+Errores comunes: No activarlo antes de necesitarlo. No registrar E911. Usar WiFi bloqueado. Pensar que funciona sin internet.
+
+MÓDULO 6 — MÉTODOS DE PAGO:
+Qué es: Los medios que usas para pagar herramientas, suscripciones y recibir tus ingresos.
+Para qué: Sin método de pago válido no puedes comprar nada ni cobrar nada.
+Opciones para pagar: tarjeta débito/crédito, PayPal, Apple Pay, Google Pay, Venmo, fintechs según tu país.
+Si tu tarjeta no pasa puede ser: dirección de facturación incorrecta, banco bloqueando, VPN activa interfiriendo, país no aceptado por esa plataforma, revisión antifraude.
+Errores comunes: Comprar cuentas PayPal falsas. Usar datos de otra persona. No guardar comprobantes. No revisar dirección de facturación.
+Advertencia real: Usar datos ajenos puede bloquearte permanentemente y afectar a la persona que te prestó los datos.
+
+MÓDULO 7 — LLC E IMPUESTOS:
+Qué es: El sistema legal y fiscal que aplica cuando generas ingresos en plataformas americanas.
+Para qué: Toda monetización seria termina pidiendo datos fiscales. No puedes ignorarlo.
+Lo básico que necesitas saber:
+- Si eres residente USA usas SSN. Si no eres residente, el formulario es diferente.
+- ITIN es para no residentes que generan ingresos en USA.
+- EIN es para empresas/LLC.
+- Una LLC te da estructura legal, protección y credibilidad para trabajar con plataformas americanas.
+- Todo debe coincidir: nombre, número, dirección.
+- No uses el SSN o EIN de un familiar. Queda ligado a impuestos, reportes y consecuencias legales para él o ella.
+- Todo ingreso puede ser reportado al IRS.
+- Busca asesoría fiscal cuando llegues a este punto.
+Errores comunes: Usar datos ajenos. No declarar ingresos. Pensar que porque estás fuera de USA no te aplica.
+Advertencia real: El número fiscal en Estados Unidos es sagrado. No se presta. Las consecuencias son reales y serias.
+
+MÓDULO 8 — AMAZON INFLUENCER:
+Qué es: Programa de Amazon que te permite crear una tienda propia (storefront) y subir videos de productos que generan comisión cuando alguien compra.
+Para qué: Ganar comisiones cada vez que alguien ve tu video y compra el producto.
+Pasos generales:
+1. Tener redes sociales con contenido real y consistente
+2. Aplicar al programa Amazon Influencer
+3. Si te aprueban, crear tu storefront
+4. Subir videos mostrando los productos claramente
+5. Hablar siempre desde experiencia real con el producto
+6. No prometer resultados. No mencionar precios (cambian).
+7. No usar música con copyright problemático
+8. Mantener tono informativo, no de venta agresiva
+Errores comunes: Subir videos sin mostrar bien el producto. Hablar sin haberlo usado. Música con copyright.
+Advertencia real: La aprobación no es automática. Revisan tus redes. Necesitas contenido real, no cuentas vacías.
+
+MÓDULO 9 — TIKTOK SHOP / TEMU:
+Qué es: Plataformas donde puedes ganar comisiones creando contenido que muestra productos.
+Para qué: Monetizar tu contenido conectando a la gente con productos que les sirven.
+Estructura de video que funciona:
+1. Gancho fuerte en los primeros 2-3 segundos (si no enganchas, se van)
+2. Mostrar el producto rápido
+3. El problema que resuelve
+4. La solución
+5. Demostración real usándolo
+6. Beneficio claro y específico
+7. CTA claro: "toca la bolsita", "link en bio", "toca el carrito"
+Errores comunes: Empezar hablando sin mostrar nada. No tener gancho. CTA confuso o inexistente. Videos largos y aburridos.
+Advertencia real: No prometas resultados médicos, pérdida de peso garantizada, dinero fácil ni cambios milagrosos. Las plataformas penalizan eso y puedes perder la cuenta.
+
+MÓDULO 10 — FACEBOOK E INSTAGRAM:
+Qué es: Plataformas de Meta donde puedes monetizar con contenido propio.
+Para qué: Generar ingresos con tus Reels, construir comunidad y activar monetización nativa.
+Lo que funciona:
+- Retención: que la gente termine de ver tus videos
+- Consistencia: publicar seguido, no desaparecer
+- Contenido original: no repitas lo que hace todo el mundo
+- Comunidad: responde, interactúa, conecta
+Pasos:
+1. Activa el modo profesional en tu cuenta
+2. Revisa el panel profesional regularmente
+3. Crea contenido dentro de un nicho claro
+4. Publica constante
+5. Mide retención, no solo likes
+6. Haz Reels que la gente quiera ver hasta el final
+Errores comunes: Obsesionarse con los likes. No tener nicho claro. Publicar y desaparecer semanas. No revisar métricas.
+Advertencia real: La monetización nativa de Meta tiene requisitos. No llega sola. Hay que construirla.
+
+MÓDULO 11 — UGC (User Generated Content):
+Qué es: Contenido que creas para marcas. Ellas lo usan en sus propias redes o anuncios.
+Para qué: Cobrar por crear videos de productos sin necesitar muchos seguidores.
+Pasos:
+1. Elegir un nicho (hogar, belleza, tecnología, etc.)
+2. Crear portafolio en Canva o Notion con 3-5 videos de ejemplo
+3. Grabar videos demostrativos aunque no te paguen al inicio (son tu portafolio)
+4. Buscar marcas pequeñas que vendan productos relacionados a tu nicho
+5. Escribir una propuesta clara y profesional
+6. Cobrar por pieza o por paquete
+7. Entregar siempre en formato vertical
+8. Cobrar extra si piden el raw footage (video sin editar)
+Mensaje de ejemplo para marcas: "Hola, vi su producto y me encantó porque encaja perfecto con contenido práctico para redes. Soy creadora UGC y puedo crearles un video corto mostrando el producto en uso, con enfoque natural y listo para TikTok, Reels o anuncios. ¿Tienen colaboraciones abiertas con creadoras?"
+Errores comunes: No tener portafolio antes de contactar marcas. Cobrar sin haber definido qué incluye. No entregar en el formato pedido.
+Advertencia real: UGC no es para todos al inicio. Necesitas saber crear contenido que se vea real y natural. Las marcas lo notan.
+
+ORDEN RECOMENDADO PARA EMPEZAR (cuando pregunten por dónde comenzar):
+1. Mentalidad y realidad — entiende que esto lleva tiempo e inversión
+2. Dispositivo limpio y organizado
+3. Correo profesional
+4. VPN paga y estable
+5. Número USA (Tello u otro)
+6. Método de pago válido
+7. Elegir UNA plataforma principal: Amazon, TikTok Shop, Temu, Facebook, Instagram o UGC
+8. Crear contenido consistente
+9. Medir resultados
+10. Ajustar y repetir
+
+RESPUESTAS A SITUACIONES COMUNES:
+Si dice "no tengo dinero para invertir": "Entonces empieza por lo que no cuesta: aprende, organiza tu perfil, crea contenido, estudia las plataformas. Pero niña, te digo la verdad: en algún momento vas a necesitar invertir. Aunque sea poco a poco. Esto no es completamente gratis. La buena noticia es que puedes ir construyendo mientras ahorras."
+
+Si dice "quiero cobrar rápido": "Te entiendo perfectamente, pero cobrar rápido sin estructura casi siempre termina en bloqueo, frustración o pérdida de dinero. Lo he visto mil veces. Primero construye la base bien hecha. Lo rápido sirve para empezar, pero lo sólido es lo que te mantiene."
+
+Si dice "¿Tello sirve para todo?": "Tello te da el número, pero no garantiza aprobación en todas las plataformas. Cada plataforma tiene sus propios filtros. Lo que realmente funciona es que TODO tu entorno sea coherente: VPN, dispositivo, correo, número, método de pago y datos reales. Si solo tienes el número pero nada más está listo, puedes tener problemas igual."
+
+Si dice "¿puedo usar el número fiscal de un familiar?": "No te lo recomiendo sin asesoría legal. Ese número queda ligado a ingresos y reportes. Puede tener consecuencias serias para esa persona. Busca tu propio camino legal."`;
+
+let history = [];
+let loading = false;
+
+function getTime() {
+  return new Date().toLocaleTimeString('es', {hour:'2-digit', minute:'2-digit'});
+}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+function sendQuick(text) {
+  document.getElementById('userInput').value = text;
+  sendMessage();
+}
+function addMessage(role, text) {
+  const chat = document.getElementById('chatArea');
+  const isUser = role === 'user';
+  const div = document.createElement('div');
+  div.className = `message ${isUser ? 'user' : 'bot'}`;
+  div.innerHTML = `
+    <div class="msg-avatar ${isUser ? 'user-av' : 'bot-av'}">${isUser ? '🌸' : 'Y'}</div>
+    <div class="msg-wrap">
+      <div class="bubble">${text.replace(/\n/g,'<br>')}</div>
+      <div class="timestamp">${getTime()}</div>
+    </div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function showTyping() {
+  const chat = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'typing'; div.id = 'typingInd';
+  div.innerHTML = `
+    <div class="msg-avatar bot-av">Y</div>
+    <div class="typing-bubble">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function removeTyping() {
+  const t = document.getElementById('typingInd');
+  if (t) t.remove();
+}
+async function sendMessage() {
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if (!text || loading) return;
+  loading = true;
+  document.getElementById('sendBtn').disabled = true;
+  input.value = ''; input.style.height = 'auto';
+  addMessage('user', text);
+  history.push({role:'user', content:text});
+  showTyping();
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: history
+      })
+    });
+    const data = await res.json();
+    removeTyping();
+    const reply = data.content?.[0]?.text || 'Ups, algo salió mal. Intenta de nuevo 🙏';
+    history.push({role:'assistant', content:reply});
+    addMessage('bot', reply);
+  } catch(err) {
+    removeTyping();
+    addMessage('bot', 'Error de conexión. Intenta de nuevo en un momento 🙏');
+  }
+  loading = false;
+  document.getElementById('sendBtn').disabled = false;
+  input.focus();
+}
+</script>
+</body>
+</html>
